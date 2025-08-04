@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contagem Regressiva</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        .countdown-font {
+            font-family: 'Orbitron', monospace;
+        }
+        
+        .glow {
+            text-shadow: 0 0 20px rgba(59, 130, 246, 0.8),
+                         0 0 40px rgba(59, 130, 246, 0.6),
+                         0 0 60px rgba(59, 130, 246, 0.4);
+        }
+        
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: .5;
+            }
+        }
+        
+        .countdown-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .number-box {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%);
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .number-box:hover {
+            transform: translateY(-5px);
+            border-color: rgba(59, 130, 246, 0.6);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        }
+        
+        .finished-animation {
+            animation: celebrate 1s ease-in-out;
+        }
+        
+        @keyframes celebrate {
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(-5deg); }
+            50% { transform: scale(1.2) rotate(5deg); }
+            75% { transform: scale(1.1) rotate(-3deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen gradient-bg flex items-center justify-center p-4">
+    <div class="w-full max-w-6xl">
+        <!-- Formulário de Configuração -->
+        <div id="setupForm" class="countdown-card rounded-2xl p-8 mb-8 shadow-2xl">
+            <h1 class="text-4xl font-bold text-white text-center mb-8">
+                Configurar Contagem Regressiva
+            </h1>
+            
+            <div class="grid md:grid-cols-2 gap-6 mb-8">
+                <div>
+                    <label class="block text-gray-300 text-sm font-medium mb-2">
+                        Data do Evento
+                    </label>
+                    <input 
+                        type="date" 
+                        id="eventDate" 
+                        class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors"
+                    >
+                </div>
+                
+                <div>
+                    <label class="block text-gray-300 text-sm font-medium mb-2">
+                        Hora do Evento
+                    </label>
+                    <input 
+                        type="time" 
+                        id="eventTime" 
+                        class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors"
+                    >
+                </div>
+            </div>
+            
+            <div class="mb-8">
+                <label class="block text-gray-300 text-sm font-medium mb-2">
+                    Nome do Evento (Opcional)
+                </label>
+                <input 
+                    type="text" 
+                    id="eventName" 
+                    placeholder="Ex: Ano Novo 2025"
+                    class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors"
+                >
+            </div>
+            
+            <button 
+                onclick="startCountdown()" 
+                class="w-full py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-lg rounded-lg hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg"
+            >
+                Começar Contagem
+            </button>
+        </div>
+        
+        <!-- Display da Contagem Regressiva -->
+        <div id="countdownDisplay" class="hidden">
+            <div class="countdown-card rounded-2xl p-8 shadow-2xl text-center">
+                <h2 id="displayEventName" class="text-3xl font-bold text-white mb-8"></h2>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="number-box rounded-xl p-6">
+                        <div id="days" class="countdown-font text-5xl md:text-7xl font-bold text-blue-400 glow">00</div>
+                        <div class="text-gray-400 text-sm md:text-base mt-2">DIAS</div>
+                    </div>
+                    
+                    <div class="number-box rounded-xl p-6">
+                        <div id="hours" class="countdown-font text-5xl md:text-7xl font-bold text-purple-400 glow">00</div>
+                        <div class="text-gray-400 text-sm md:text-base mt-2">HORAS</div>
+                    </div>
+                    
+                    <div class="number-box rounded-xl p-6">
+                        <div id="minutes" class="countdown-font text-5xl md:text-7xl font-bold text-pink-400 glow">00</div>
+                        <div class="text-gray-400 text-sm md:text-base mt-2">MINUTOS</div>
+                    </div>
+                    
+                    <div class="number-box rounded-xl p-6">
+                        <div id="seconds" class="countdown-font text-5xl md:text-7xl font-bold text-red-400 glow">00</div>
+                        <div class="text-gray-400 text-sm md:text-base mt-2">SEGUNDOS</div>
+                    </div>
+                </div>
+                
+                <button 
+                    onclick="resetCountdown()" 
+                    class="px-8 py-3 bg-gray-700 text-white font-medium rounded-lg hover:bg-gray-600 transform hover:scale-105 transition-all duration-300"
+                >
+                    Nova Contagem
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mensagem de Término -->
+        <div id="finishedMessage" class="hidden">
+            <div class="countdown-card rounded-2xl p-12 shadow-2xl text-center finished-animation">
+                <div class="text-6xl mb-6">🎉</div>
+                <h2 class="text-4xl md:text-6xl font-bold text-white mb-4 glow">Chegou a Hora!</h2>
+                <p id="finishedEventName" class="text-xl md:text-2xl text-gray-300 mb-8"></p>
+                <button 
+                    onclick="resetCountdown()" 
+                    class="px-8 py-4 bg-gradient-to-r from-green-500 to-blue-600 text-white font-bold text-lg rounded-lg hover:from-green-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-300 shadow-lg"
+                >
+                    Criar Nova Contagem
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let countdownInterval;
+        
+        // Definir data e hora padrão para amanhã às 00:00
+        window.onload = function() {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            const dateInput = document.getElementById('eventDate');
+            const timeInput = document.getElementById('eventTime');
+            
+            dateInput.value = tomorrow.toISOString().split('T')[0];
+            timeInput.value = '00:00';
+        };
+        
+        function startCountdown() {
+            const dateInput = document.getElementById('eventDate').value;
+            const timeInput = document.getElementById('eventTime').value;
+            const eventName = document.getElementById('eventName').value || 'Contagem Regressiva';
+            
+            if (!dateInput || !timeInput) {
+                showNotification('Por favor, preencha a data e a hora!');
+                return;
+            }
+            
+            const targetDate = new Date(`${dateInput}T${timeInput}`);
+            
+            if (targetDate <= new Date()) {
+                showNotification('Por favor, selecione uma data e hora futuras!');
+                return;
+            }
+            
+            // Esconder formulário e mostrar contagem
+            document.getElementById('setupForm').classList.add('hidden');
+            document.getElementById('countdownDisplay').classList.remove('hidden');
+            document.getElementById('displayEventName').textContent = eventName;
+            
+            // Iniciar contagem
+            updateCountdown(targetDate);
+            countdownInterval = setInterval(() => updateCountdown(targetDate), 1000);
+        }
+        
+        function updateCountdown(targetDate) {
+            const now = new Date().getTime();
+            const distance = targetDate.getTime() - now;
+            
+            if (distance < 0) {
+                finishCountdown();
+                return;
+            }
+            
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            document.getElementById('days').textContent = String(days).padStart(2, '0');
+            document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+            document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+            document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+            
+            // Adicionar efeito de pulso no último segundo
+            if (seconds === 0 && minutes === 0 && hours === 0 && days === 0) {
+                document.querySelectorAll('.number-box').forEach(box => {
+                    box.classList.add('pulse');
+                });
+            }
+        }
+        
+        function finishCountdown() {
+            clearInterval(countdownInterval);
+            document.getElementById('countdownDisplay').classList.add('hidden');
+            document.getElementById('finishedMessage').classList.remove('hidden');
+            document.getElementById('finishedEventName').textContent = 
+                document.getElementById('displayEventName').textContent;
+        }
+        
+        function resetCountdown() {
+            clearInterval(countdownInterval);
+            document.getElementById('setupForm').classList.remove('hidden');
+            document.getElementById('countdownDisplay').classList.add('hidden');
+            document.getElementById('finishedMessage').classList.add('hidden');
+            
+            // Resetar valores
+            document.getElementById('eventName').value = '';
+            document.querySelectorAll('.number-box').forEach(box => {
+                box.classList.remove('pulse');
+            });
+        }
+        
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
